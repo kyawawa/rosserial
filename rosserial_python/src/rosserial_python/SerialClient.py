@@ -113,16 +113,17 @@ class Subscriber:
         Subscriber forwards messages from ROS to the serial device.
     """
 
-    def __init__(self, topic_info, parent):
+    def __init__(self, topic_info, parent, queue_size=None):
         self.topic = topic_info.topic_name
         self.id = topic_info.topic_id
         self.parent = parent
+        self.queue_size = queue_size
 
         # find message type
         package, message = topic_info.message_type.split('/')
         self.message = load_message(package, message)
         if self.message._md5sum == topic_info.md5sum:
-            self.subscriber = rospy.Subscriber(self.topic, self.message, self.callback)
+            self.subscriber = rospy.Subscriber(self.topic, self.message, self.callback, self.queue_size)
         else:
             raise Exception('Checksum does not match: ' + self.message._md5sum + ',' + topic_info.md5sum)
 
